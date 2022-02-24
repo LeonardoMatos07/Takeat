@@ -26,5 +26,9 @@ db.sequelize = sequelize;
  
 db.Customerr = require('../models/customer.model.js')(sequelize, Sequelize);
 db.restaurants = require('../models/restaurant.model.js')(sequelize, Sequelize);
- 
+db.products = require('../models/product.model.js')(sequelize, Sequelize);
+db.buyers = require('../models/buyer.model.js')(sequelize, Sequelize);
+db.orders = require('../models/order.model.js')(sequelize, Sequelize);
+db.logins = require('../models/login.model.js')(sequelize, Sequelize);
+
 module.exports = db;

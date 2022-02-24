@@ -22,9 +22,9 @@ module.exports = (sequelize, Sequelize) => {
 	  age: {
 			type: Sequelize.INTEGER
     },
-    copyrightby: {
-      type: Sequelize.STRING,
-      defaultValue: 'https://loizenai.com'	
+      copyrightby: {
+      		type: Sequelize.STRING,
+      		defaultValue: 'https://loizenai.com'	
     }
 	});
 	

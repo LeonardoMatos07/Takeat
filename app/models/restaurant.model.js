@@ -1,10 +1,9 @@
-/**
- * Copyright by https://loizenai.com
- * youtube loizenai
- */
+
+const bcrypt = require('bcryptjs')
 
 const resturant = (sequelize, Sequelize) => {
-	const Restaurant = sequelize.define('Restaurant', {	
+
+	const Restaurant = sequelize.define('restaurant', {	
 	  id: {
 			type: Sequelize.INTEGER,
 			autoIncrement: true,
@@ -17,7 +16,11 @@ const resturant = (sequelize, Sequelize) => {
 			type: Sequelize.STRING
   	},
 	  password: {
-			type: Sequelize.STRING
+			type: Sequelize.STRING,
+			set(value) {
+				const hash = bcrypt.hashSync(value, 10);
+				this.setDataValue('password', hash);
+			  },
 	},
 	  address: {
 			type: Sequelize.STRING
@@ -26,14 +29,17 @@ const resturant = (sequelize, Sequelize) => {
 			type: Sequelize.BOOLEAN
  	},
 	  canceled_at  : {
-			type: Sequelize.STRING
+			type: Sequelize.DATE
     },
 	  phone: {
 			type: Sequelize.INTEGER
     }
-	});
-	
+
+	})
+
 	return Restaurant;
-};
+	
+}
 
 module.exports = resturant
+

@@ -3,9 +3,15 @@
  * youtube loizenai
  */
 
-const db = require('../config/db.config.js');
+const db = require('../config/db.config');
 const Customer = db.Customerr;
 const Restaurant = db.restaurants;
+const Product = db.products;
+const Login = db.logins;
+const logger = require('pino')()
+const bcrypt = require('bcryptjs')
+const generateJwtToken = require('../helpers/generateJwtToken')
+var id = require('../middlewares/auth.js')
 
 exports.create = (req, res) => {
     let customer = {};
@@ -34,25 +40,51 @@ exports.create = (req, res) => {
 }
 
 exports.createRestaurant = (req, res) => {
-  let restaurant = {};
+  //const restaurant = {};
 
   try{
       // Building Customer object from upoading request's body
-      restaurant.username = req.body.username;
-      restaurant.email = req.body.email;
-      restaurant.address = req.body.address;
-      restaurant.password = req.body.password;
-      restaurant.phone = req.body.phone;
-      restaurant.has_service_tax = req.body.has_service_tax;
-  
-      // Save to MySQL database
-      Restaurant.create(restaurant).then(result => {    
-          // send uploading message to client
-          res.status(200).json({
-              message: "Upload Successfully a Customer with id = " + result.id,
-              restaurant: result,
-          });
-      });
+
+      
+      const restaurant = {
+            username: req.body.username,
+            email: req.body.email,
+            address: req.body.address,
+            password: req.body.password,
+            phone: req.body.phone,
+            has_service_tax: req.body.has_service_tax
+      }
+      const { username } = req.body;
+
+      if(!req.body.username || !req.body.email || !req.body.address || !req.body.password || !req.body.phone || !req.body.has_service_tax){
+        logger.error({msg:"Não foi possivel cadastrar o usuario, dados incompletos"})
+        return res.status(400).json({hasError: true, erro: "Não foi possivel cadastrar o usuario, dados incompletos"})
+     }
+
+      Restaurant.findAll({
+        where: {username: username}
+    })
+        .then(result => {
+            if (result == '') {
+            
+                Restaurant.create(restaurant).then(result => {    
+                    // send uploading message to client
+                    res.status(200).json({
+                        message: "Restaurant Registered Successfully" + result.id,
+                        restaurants: result,
+                    });
+                });
+            
+            }
+                
+            else{
+                res.status(200).json({
+                message: "Existing Restaurant!",
+              
+            });
+        }
+        })
+
   }catch(error){
       res.status(500).json({
           message: "Fail!",
@@ -63,31 +95,68 @@ exports.createRestaurant = (req, res) => {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-exports.retrieveAllCustomers = (req, res) => {
-    // find all Customer information from 
-    Customer.findAll()
-        .then(customerInfos => {
+exports.createProduct =  async (req, res) => {
+    const product = {};
+  
+    try{
+        const loginRest = await Login.findOne({ where: { status: true } })
+        console.log("LOGINNN:", loginRest)
+        product.name = req.body.name;
+        product.value = req.body.value;
+        product.restaurant_id = loginRest.id_restaurant_login;
+        //product.restaurant_id = restaurant_id;
+       // product.value = product.value/10;
+        // PEGAR ID PELO NOME DO RESTAURANTE
+        // Save to MySQL database
+        Product.create(product).then(result => {    
+            // send uploading message to client
             res.status(200).json({
-                message: "Get all Customers' Infos Successfully!",
-                customers: customerInfos
+                message: "Upload Successfully a Customer with id = " + result.id,
+                product: result,
             });
+        });
+    }catch(error){
+        res.status(500).json({
+            message: "Fail!",
+            error: error.message
+        });
+    }
+  }
+  
+  
+
+exports.login = (req, res) => {
+
+    Restaurant.findOne({
+        where: { email: req.body.email }
+    })
+        .then(result => {
+            if (!result) {
+                return res.status(404).send({
+                  message: 'Restaurant Not Found, check your email',
+                })}
+                
+            bcrypt.compare(req.body.password, result.password, (err, results) => {
+
+                if (results){  
+                        
+                    console.log(result.password, req.body.password, result.id, "DEU CERTO")
+                    return res.status(200).json({
+                        message: "Restaurant Found!",
+                        restaurants: result,
+                        token:generateJwtToken.newToken(result.id)
+                    });
+                }
+                else {
+                    console.log("errado")
+                    return res.status(404).send({
+                        message: 'Password invalid',
+                      })
+                    }
+                });
+        
         })
         . catch(error => {
-          // log on console
           console.log(error);
 
           res.status(500).json({
@@ -95,6 +164,7 @@ exports.retrieveAllCustomers = (req, res) => {
               error: error
           });
         });
+
 }
 
 exports.getCustomerById = (req, res) => {
