@@ -11,7 +11,6 @@ const Login = db.logins;
 const logger = require('pino')()
 const bcrypt = require('bcryptjs')
 const generateJwtToken = require('../helpers/generateJwtToken')
-var id = require('../middlewares/auth.js')
 
 exports.create = (req, res) => {
     let customer = {};
@@ -99,8 +98,12 @@ exports.createProduct =  async (req, res) => {
     const product = {};
   
     try{
-        const loginRest = await Login.findOne({ where: { status: true } })
-        console.log("LOGINNN:", loginRest)
+
+        const loginRest = await Login.findOne({ 
+            where: { status: true },
+            order: [['id', 'DESC']],  
+        })
+
         product.name = req.body.name;
         product.value = req.body.value;
         product.restaurant_id = loginRest.id_restaurant_login;
@@ -108,7 +111,7 @@ exports.createProduct =  async (req, res) => {
        // product.value = product.value/10;
         // PEGAR ID PELO NOME DO RESTAURANTE
         // Save to MySQL database
-        Product.create(product).then(result => {    
+        await Product.create(product).then(result => {    
             // send uploading message to client
             res.status(200).json({
                 message: "Upload Successfully a Customer with id = " + result.id,
