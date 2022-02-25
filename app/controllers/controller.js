@@ -1,81 +1,47 @@
-/**
- * Copyright by https://loizenai.com
- * youtube loizenai
- */
 
 const db = require('../config/db.config');
 const Customer = db.Customerr;
 const Restaurant = db.restaurants;
 const Product = db.products;
 const Login = db.logins;
+const Buyer = db.buyers;
+const Order = db.orders;
 const logger = require('pino')()
 const bcrypt = require('bcryptjs')
-const generateJwtToken = require('../helpers/generateJwtToken')
+const generateJwtToken = require('../helpers/generateJwtToken');
 
-exports.create = (req, res) => {
-    let customer = {};
-
-    try{
-        // Building Customer object from upoading request's body
-        customer.firstname = req.body.firstname;
-        customer.lastname = req.body.lastname;
-        customer.address = req.body.address;
-        customer.age = req.body.age;
-    
-        // Save to MySQL database
-        Customer.create(customer).then(result => {    
-            // send uploading message to client
-            res.status(200).json({
-                message: "Upload Successfully a Customer with id = " + result.id,
-                customer: result,
-            });
-        });
-    }catch(error){
-        res.status(500).json({
-            message: "Fail!",
-            error: error.message
-        });
-    }
-}
 
 exports.createRestaurant = (req, res) => {
-  //const restaurant = {};
-
+  
   try{
-      // Building Customer object from upoading request's body
-
-      
+    
       const restaurant = {
             username: req.body.username,
             email: req.body.email,
             address: req.body.address,
             password: req.body.password,
             phone: req.body.phone,
-            has_service_tax: req.body.has_service_tax
+            has_service_tax: r2|XCeq.body.has_service_tax
       }
-      const { username } = req.body;
 
       if(!req.body.username || !req.body.email || !req.body.address || !req.body.password || !req.body.phone || !req.body.has_service_tax){
-        logger.error({msg:"Não foi possivel cadastrar o usuario, dados incompletos"})
-        return res.status(400).json({hasError: true, erro: "Não foi possivel cadastrar o usuario, dados incompletos"})
+        logger.error({msg:"Unable to register, incomplete data"})
+        return res.status(400).json({hasError: true, erro: "Unable to register, incomplete data"})
      }
 
       Restaurant.findAll({
-        where: {username: username}
+        where: {email: req.body.email}
     })
         .then(result => {
             if (result == '') {
             
-                Restaurant.create(restaurant).then(result => {    
-                    // send uploading message to client
-                    res.status(200).json({
-                        message: "Restaurant Registered Successfully" + result.id,
-                        restaurants: result,
-                    });
+                Restaurant.create(restaurant)   
+                restaurant.password = null
+                res.status(200).json({
+                    message: "Restaurant Registered Successfully",
+                    restaurants: restaurant
                 });
-            
-            }
-                
+            }   
             else{
                 res.status(200).json({
                 message: "Existing Restaurant!",
@@ -91,42 +57,6 @@ exports.createRestaurant = (req, res) => {
       });
   }
 }
-
-
-
-exports.createProduct =  async (req, res) => {
-    const product = {};
-  
-    try{
-
-        const loginRest = await Login.findOne({ 
-            where: { status: true },
-            order: [['id', 'DESC']],  
-        })
-
-        product.name = req.body.name;
-        product.value = req.body.value;
-        product.restaurant_id = loginRest.id_restaurant_login;
-        //product.restaurant_id = restaurant_id;
-       // product.value = product.value/10;
-        // PEGAR ID PELO NOME DO RESTAURANTE
-        // Save to MySQL database
-        await Product.create(product).then(result => {    
-            // send uploading message to client
-            res.status(200).json({
-                message: "Upload Successfully a Customer with id = " + result.id,
-                product: result,
-            });
-        });
-    }catch(error){
-        res.status(500).json({
-            message: "Fail!",
-            error: error.message
-        });
-    }
-  }
-  
-  
 
 exports.login = (req, res) => {
 
@@ -167,29 +97,135 @@ exports.login = (req, res) => {
               error: error
           });
         });
-
 }
 
-exports.getCustomerById = (req, res) => {
-  // find all Customer information from 
-  let customerId = req.params.id;
-  Customer.findByPk(customerId)
-      .then(customer => {
-          res.status(200).json({
-              message: " Successfully Get a Customer with id = " + customerId,
-              customers: customer
-          });
-      })
-      . catch(error => {
-        // log on console
-        console.log(error);
+exports.createProduct =  async (req, res) => {
+    const product = {};
+  
+    try{
 
-        res.status(500).json({
-            message: "Error!",
-            error: error
+        const loginRest = await Login.findOne({ 
+            where: { status: true },
+            order: [['id', 'DESC']],  
+        })
+
+        const verifyRestaurant = await Product.findOne({ where: {name: req.body.name, restaurant_id: loginRest.id_restaurant_login}})
+            if(verifyRestaurant){
+
+                return res.status(200).json({
+                    message: "Existing Product this Restaurant!",
+                
+                });
+        }
+        product.name = req.body.name;
+        product.value = req.body.value;
+        product.restaurant_id = loginRest.id_restaurant_login;
+   
+        await Product.create(product).then(result => {    
+            
+            res.status(200).json({
+                message: "Upload Successfully a Customer with id = " + result.id,
+                product: result,
+            });
         });
-      });
+
+    }catch(error){
+        res.status(500).json({
+            message: "Fail!",
+            error: error.message
+        });
+    }
+  }
+  
+
+exports.getProducts = async (req, res) => {
+
+    try{
+        const loginRest = await Login.findOne({ 
+            where: { status: true },
+            order: [['id', 'DESC']],  
+        })
+
+        const listProducts = await Product.findAll({where: {restaurant_id: loginRest.id_restaurant_login}})
+        res.status(200).json({
+            message: "Products list",
+            products: listProducts,
+        });
+
+    }catch(error){
+        res.status(500).json({
+            message: "Fail!",
+            error: error.message
+        });
+    }
 }
+
+
+exports.createOrder =  async (req, res) => {
+  
+    try{
+
+        const buyer = await Buyer.findOne({
+            where: { phone: req.body.phone }
+        })
+
+        const loginRest = await Login.findOne({ 
+            where: { status: true },
+            order: [['id', 'DESC']],  
+        })
+
+        const order = {};
+
+        if(buyer) {
+
+            const product
+            order.product_id = req.body.product_id;
+            order.amount = req.body.amount;
+            order.phone = buyer.phone;
+            order.name = req.body.name;
+            order.buyer_id = buyer.id;
+            order.restaurant_id = loginRest.id_restaurant_login;
+
+        
+
+            await Order.create(order)
+
+            return res.status(400).json({
+                message: "Order Created Successfully!",
+                order: order
+            
+            });
+
+        }
+        else{
+            const createBuyer = {};
+            createBuyer.name = req.body.name;
+            createBuyer.phone = req.body.phone;
+            const buyerCreated = await Buyer.create(createBuyer)
+            
+            order.product_id = req.body.product_id;
+            order.amount = req.body.amount;
+            order.phone = buyerCreated.phone;
+            order.name = req.body.name;
+            order.buyer_id = buyerCreated.id;
+            order.restaurant_id = loginRest.id_restaurant_login;
+            
+            await Order.create(order)
+
+            return res.status(400).json({
+                message: "Buyer and Order Created Successfully!",
+                order: order
+            
+            });
+        }
+
+    }catch(error){
+        res.status(500).json({
+            message: "Fail!",
+            error: error.message
+        });
+    }
+  }
 
 
 exports.filteringByAge = (req, res) => {
