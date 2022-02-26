@@ -116,7 +116,7 @@ exports.createProduct =  async (req, res) => {
         await Product.create(product).then(result => {    
             
             res.status(200).json({
-                message: "Upload Successfully a Customer with id = " + result.id,
+                message: "Product Created Successfully ",
                 product: result,
             });
         });
@@ -250,7 +250,7 @@ exports.createOrder =  async (req, res) => {
         const listOrders = await Order.findAll({where: {restaurant_id: loginRest.id_restaurant_login}})
         res.status(200).json({
             message: "Orders list",
-            products: listOrders,
+            orders: listOrders
         });
 
     }catch(error){

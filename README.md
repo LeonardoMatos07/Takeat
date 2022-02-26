@@ -6,6 +6,7 @@
 - pino para logs da aplicação;
 - jsonwebtoken para autenticação via jwt;
 - sequelize para ORM;
+- bcrypt para criptografia do password;
 
 <br />
 
