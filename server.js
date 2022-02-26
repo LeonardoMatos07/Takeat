@@ -6,9 +6,6 @@ const dotenv = require("dotenv");
 const app = express()
 const logger = require('pino')()
 
-
-
-
 app.use(
   bodyParser.urlencoded({
     extended: true,
