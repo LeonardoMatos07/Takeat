@@ -1,7 +1,3 @@
-/**
- * Copyright by https://loizenai.com
- * youtube loizenai
- */
 
 const env = require('./env.js');
  
@@ -24,7 +20,6 @@ const db = {};
 db.Sequelize = Sequelize;
 db.sequelize = sequelize;
  
-db.Customerr = require('../models/customer.model.js')(sequelize, Sequelize);
 db.restaurants = require('../models/restaurant.model.js')(sequelize, Sequelize);
 db.products = require('../models/product.model.js')(sequelize, Sequelize);
 db.buyers = require('../models/buyer.model.js')(sequelize, Sequelize);

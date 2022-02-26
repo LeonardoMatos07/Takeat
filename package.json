@@ -12,7 +12,7 @@
     "postgresql",
     "example"
   ],
-  "author": "https://loizenai.com",
+  "author": "Leonardo",
   "license": "ISC",
   "dependencies": {
     "bcrypt": "^5.0.1",
