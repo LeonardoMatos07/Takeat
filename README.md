@@ -19,7 +19,7 @@
 ## Rotas e exemplos:
 
 <br />
-Para cadastrar num novo restaurante
+Para cadastrar um novo restaurante
 
 #### [POST] em /public/restaurants
 <br />
