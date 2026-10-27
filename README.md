@@ -12,8 +12,12 @@
 
 ## Como executar a aplicação:
 
-### Criar arquivo .env na raiz do projeto
-- Definir SECRET_HASH da aplicação
+### Configurar variáveis de ambiente
+Copie `.env.example` para `.env` e preencha:
+- `SECRET_HASH`: segredo usado para assinar os tokens JWT
+- `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_HOST`: conexão com o PostgreSQL
+
+Depois instale as dependências com `npm install` e rode `npm start`.
 
 
 ## Rotas e exemplos:
